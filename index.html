@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>[AURA] Roman Altar & Historical Artifacts | Original vs Gemini AI</title>
+    <style>
+        :root {
+            --bg-dark: #0a0d10;
+            --bg-card: #12171d;
+            --border-green: #20eb60;
+            --border-dim: #15632d;
+            --text-bright: #33ff66;
+            --text-main: #d1dfd4;
+            --text-muted: #718879;
+            --amber-glow: #ffb000;
+            --cyan-glow: #00f0ff;
+            --ai-accent: #ff3366;
+            --human-accent: #00eb88;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            min-height: 100vh;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.4;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(32, 235, 96, 0.03) 0%, transparent 80%),
+                linear-gradient(rgba(18, 23, 29, 0.7) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 23, 29, 0.7) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+        }
+
+        /* ASCII Outer Container */
+        .ascii-container {
+            width: 100%;
+            max-width: 920px;
+            border: 2px dashed var(--border-green);
+            background: rgba(10, 13, 16, 0.95);
+            padding: 16px;
+            box-shadow: 0 0 25px rgba(32, 235, 96, 0.12);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Top Header Bar */
+        .ascii-header {
+            border: 1px dashed var(--border-green);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            background: #0d1217;
+            font-size: 14px;
+            color: var(--text-bright);
+            text-shadow: 0 0 5px rgba(51, 255, 102, 0.5);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .aura-tag {
+            background: var(--text-bright);
+            color: #000;
+            padding: 2px 6px;
+            font-weight: bold;
+            border-radius: 2px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active, .mode-btn:hover {
+            border-color: var(--border-green);
+            color: var(--text-bright);
+            background: rgba(32, 235, 96, 0.1);
+        }
+
+        .streak-badge {
+            color: var(--amber-glow);
+            font-weight: bold;
+            border: 1px solid var(--amber-glow);
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        /* Question Banner */
+        .question-box {
+            text-align: center;
+            margin: 16px 0 20px 0;
+            padding: 10px;
+            background: rgba(21, 99, 45, 0.1);
+            border-left: 3px solid var(--border-green);
+            border-right: 3px solid var(--border-green);
+        }
+
+        .question-box h2 {
+            font-size: 18px;
+            color: #fff;
+            letter-spacing: 0.5px;
+            font-weight: normal;
+        }
+
+        /* Dual Card Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 680px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-card {
+            border: 1px dashed var(--border-green);
+            background: var(--bg-card);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .image-card:hover {
+            border-color: var(--cyan-glow);
+        }
+
+        .card-label {
+            font-size: 14px;
+            color: var(--text-bright);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .img-wrapper {
+            width: 100%;
+            height: 280px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #1a2620;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+        }
+
+        .img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Zoom Loupe Glass */
+        .loupe {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border: 2px solid var(--cyan-glow);
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6), inset 0 0 10px rgba(0,0,0,0.8);
+            background-repeat: no-repeat;
+            z-index: 50;
+            background-color: #000;
+        }
+
+        .select-btn {
+            margin-top: 14px;
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid var(--border-green);
+            color: var(--text-bright);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .select-btn:hover {
+            background: var(--text-bright);
+            color: #000;
+            box-shadow: 0 0 12px rgba(51, 255, 102, 0.4);
+        }
+
+        /* Interactive Footer Bar in ASCII */
+        .ascii-footer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--cyan-glow);
+            padding: 8px;
+            border: 1px dashed var(--border-dim);
+            background: #0b0f14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .loupe-toggle-btn {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--cyan-glow);
+            color: var(--cyan-glow);
+            padding: 3px 10px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .loupe-toggle-btn.active {
+            background: var(--cyan-glow);
+            color: #000;
+        }
+
+        /* Reveal Modal / Panel */
+        .reveal-panel {
+            display: none;
+            margin-top: 20px;
+            border: 2px solid var(--border-green);
+            background: #0f151b;
+            padding: 18px;
+            border-radius: 4px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .reveal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-dim);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .result-badge {
+            font-size: 15px;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 3px;
+        }
+
+        .result-badge.correct {
+            background: rgba(0, 235, 136, 0.2);
+            color: var(--human-accent);
+            border: 1px solid var(--human-accent);
+        }
+
+        .result-badge.incorrect {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--ai-accent);
+            border: 1px solid var(--ai-accent);
+        }
+
+        .analysis-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .analysis-box { grid-template-columns: 1fr; }
+        }
+
+        .analysis-card {
+            background: #151c24;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--text-muted);
+        }
+
+        .analysis-card.human { border-left-color: var(--human-accent); }
+        .analysis-card.ai { border-left-color: var(--ai-accent); }
+
+        .analysis-card h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .analysis-card.human h4 { color: var(--human-accent); }
+        .analysis-card.ai h4 { color: var(--ai-accent); }
+
+        .next-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--amber-glow);
+            color: #000;
+            font-family: inherit;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .next-btn:hover {
+            background: #ffc43d;
+            box-shadow: 0 0 15px rgba(255, 176, 0, 0.4);
+        }
+
+        /* Educational Tabs & Section */
+        .info-section {
+            width: 100%;
+            max-width: 920px;
+            margin-top: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .info-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-dim);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            border-radius: 3px;
+        }
+
+        .tab-btn.active {
+            border-color: var(--border-green);
+            color: var(--text-bright);
+            background: rgba(32, 235, 96, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            font-size: 13px;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content h3 {
+            color: var(--amber-glow);
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 1px dashed rgba(255,176,0,0.3);
+            padding-bottom: 4px;
+        }
+
+        .tab-content p {
+            margin-bottom: 12px;
+        }
+
+        .credit-box {
+            background: #0b0f14;
+            border: 1px solid var(--border-dim);
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .credit-box strong {
+            color: var(--text-bright);
+        }
+
+        .sketch-preview-box {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .sketch-preview-box img {
+            max-width: 100%;
+            border: 1px solid var(--border-green);
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ASCII Main Container -->
+    <div class="ascii-container">
+        
+        <!-- Header Wireframe -->
+        <div class="ascii-header">
+            <div class="header-left">
+                <span class="aura-tag">[AURA]</span>
+                <div class="mode-selector">
+                    <button class="mode-btn active" id="mode-gauntlet" onclick="switchGameMode('gauntlet')">Daily Gauntlet</button>
+                    <button class="mode-btn" id="mode-infinite" onclick="switchGameMode('infinite')">Infinite Duel</button>
+                </div>
+            </div>
+            <!-- STREAK INITIALIZED TO 0 -->
+            <div class="streak-badge" id="streak-display">Streak: 0</div>
+        </div>
+
+        <!-- Question Box -->
+        <div class="question-box">
+            <h2 id="question-text">Which image is the ORIGINAL human creation?</h2>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="round-indicator">
+                Round 1 of 5: Painted Roman Altar (Ara)
+            </div>
+        </div>
+
+        <!-- Dual Card Grid -->
+        <div class="comparison-grid">
+            
+            <!-- Card A -->
+            <div class="image-card" id="card-a">
+                <div class="card-label">IMAGE A</div>
+                <div class="img-wrapper" id="wrapper-a" onmousemove="handleLoupe(event, 'a')" onmouseleave="hideLoupe('a')" ontouchmove="handleTouchLoupe(event, 'a')" ontouchend="hideLoupe('a')">
+                    <img id="img-a" src="" alt="Artifact Option A" onerror="handleImageError(this)">
+                    <div class="loupe" id="loupe-a"></div>
+                </div>
+                <button class="select-btn" onclick="makeSelection('A')">
+                    [ SELECT A ]
+                </button>
+            </div>
+
+            <!-- Card B -->
+            <div class="image-card" id="card-b">
+                <div class="card-label">IMAGE B</div>
+                <div class="img-wrapper" id="wrapper-b" onmousemove="handleLoupe(event, 'b')" onmouseleave="hideLoupe('b')" ontouchmove="handleTouchLoupe(event, 'b')" ontouchend="hideLoupe('b')">
+                    <img id="img-b" src="" alt="Artifact Option B" onerror="handleImageError(this)">
+                    <div class="loupe" id="loupe-b"></div>
+                </div>
+                <button class="select-btn" onclick="makeSelection('B')">
+                    [ SELECT B ]
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ASCII Interactive Footer -->
+        <div class="ascii-footer">
+            <span>🔍 <span id="loupe-status-text">Hold [Space] or Hover for Zoom Loupe</span></span>
+            <button class="loupe-toggle-btn active" id="loupe-toggle-btn" onclick="toggleLoupeMode()">Toggle Zoom Loupe [ON]</button>
+        </div>
+
+        <!-- Reveal / Analysis Modal Box -->
+        <div class="reveal-panel" id="reveal-panel">
+            <div class="reveal-header">
+                <div class="result-badge" id="result-badge">CORRECT DETERMINATION</div>
+                <div style="font-size: 13px; color: var(--amber-glow);" id="item-title-reveal">Painted Roman Altar</div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="analysis-card human">
+                    <h4>🏛️ Human Original (<span id="human-card-letter">Image A</span>)</h4>
+                    <p id="human-desc">Authentic archaeological artifact displaying natural mineral patina, authentic craquelure, and real plaster wear.</p>
+                </div>
+                <div class="analysis-card ai">
+                    <h4>🤖 Gemini AI Edit (<span id="ai-card-letter">Image B</span>)</h4>
+                    <p id="ai-desc">AI generated inpainting with smoothed digital brushwork, unnatural color vibrancy, and synthesized figure restoration.</p>
+                </div>
+            </div>
+
+            <div id="detailed-diff-text" style="font-size: 12px; color: var(--text-main); background: #0b0f14; padding: 10px; border-left: 2px solid var(--amber-glow); margin-bottom: 12px;">
+                <!-- Detailed diff populated via JS -->
+            </div>
+
+            <button class="next-btn" onclick="nextRound()" id="next-btn-text">
+                NEXT CHALLENGE ➔
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Educational & History Section -->
+    <div class="info-section">
+        <div class="info-tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-altar', this)">Roman Altar (Ara)</button>
+            <button class="tab-btn" onclick="switchTab('tab-termini', this)">Villa di Termini</button>
+            <button class="tab-btn" onclick="switchTab('tab-pompeii', this)">Pompeian Fresco</button>
+            <button class="tab-btn" onclick="switchTab('tab-ossuary', this)">San Bernardino Chapel</button>
+            <button class="tab-btn" onclick="switchTab('tab-ark', this)">Noah's Ark Fresco</button>
+            <button class="tab-btn" onclick="switchTab('tab-ai', this)">Gemini AI Inpainting</button>
+            <button class="tab-btn" onclick="switchTab('tab-sketch', this)">Original Sketch Wireframe</button>
+        </div>
+
+        <!-- Tab 1: Roman Altar -->
+        <div class="tab-content active" id="tab-altar">
+            <h3>The Polychrome Roman Sacrificial Altar</h3>
+            <p>
+                The <strong>Roman Altar (Ara)</strong> showcased here is a rare surviving example of a painted stone sacrificial altar from ancient Rome, preserved in the collection of the <em>Museo Nazionale Romano</em> (Baths of Diocletian / Palazzo Massimo alle Terme).
+            </p>
+            <p>
+                <strong>Iconography & Construction:</strong> Unlike plain marble altars, this piece retains vivid polychrome fresco pigments applied directly to plaster on stone. The front face panel portrays the goddess <strong>Ceres (or Abundantia)</strong> seated gracefully holding a sheaf of golden wheat ears and a palm branch, symbolizing fertility, agricultural wealth, and divine blessing. At the base rests a sculpted stone gargoyle/mask spout, designed to drain libations or water during sacrificial rituals.
+            </p>
+            <div class="credit-box">
+                <strong>Source Credits:</strong> Photo courtesy of <em>www.bellitalie.org</em> | Museo Nazionale Romano - Terme di Diocleziano / Palazzo Massimo, Rome, Italy.
+            </div>
+        </div>
+
+        <!-- Tab 2: Villa di Termini -->
+        <div class="tab-content" id="tab-termini">
+            <h3>The Wall Paintings of Villa di Termini</h3>
+            <p>
+                The <strong>Villa di Termini</strong> (often associated with the lavish suburban <em>Villa della Farnesina</em> complex near the Tiber and Termini area) was discovered in 1879 during urban development works around Roma Termini railway station.
+            </p>
+            <p>
+                <strong>Architectural Style & Significance:</strong> Dating to the Late Roman Republic / Early Augustan Age (c. 30–20 BCE), these frescoes represent the pinnacle of <em>Second and Third Pompeian Styles</em>. They feature trompe-l'œil architectural frames with cinnabar red columns, delicate garlands, and floating mythological figures set within illusionistic white-ground alcoves.
+            </p>
+            <p>
+                <strong>Archaeological Preservation:</strong> The original plaster panel exhibits real historical damages: large lacunae (plaster loss on the left), faded pigment outlines, and structural cracks caused by ground pressure and centuries underground.
+            </p>
+            <div class="credit-box">
+                <strong>Source Credits:</strong> Archaeological Heritage of Rome | Museo Nazionale Romano - Palazzo Massimo alle Terme.
+            </div>
+        </div>
+
+        <!-- Tab 3: Pompeian Fresco -->
+        <div class="tab-content" id="tab-pompeii">
+            <h3>Pompeian Mythological Wall Fresco</h3>
+            <p>
+                This ancient Roman fresco depicts a classic mythological scene featuring <strong>Hermes (Mercury)</strong> holding his signature golden caduceus staff alongside seated <strong>Hera (Juno)</strong> and a kneeling supplicant figure.
+            </p>
+            <p>
+                <strong>AI Inpainting Modification:</strong> In the AI-generated edit, Gemini replaced the standing nude Hermes figure with a draped Roman scholar/orator wearing a rich red mantle and holding a rolled parchment scroll.
+            </p>
+            <div class="credit-box">
+                <strong>Source Credits:</strong> Ancient Roman Fresco Archive | Archaeological Collections of Italy.
+            </div>
+        </div>
+
+        <!-- Tab 4: San Bernardino Chapel -->
+        <div class="tab-content" id="tab-ossuary">
+            <h3>San Bernardino alle Ossa Chapel</h3>
+            <p>
+                The <strong>San Bernardino alle Ossa</strong> chapel in Milan, Italy, is world-famous for its Baroque ossuary walls intricately lined with human bones and skulls, crowned by elaborate ceiling frescoes.
+            </p>
+            <p>
+                <strong>AI Inpainting Modification:</strong> Gemini AI targeted the lower left decorative altar frame, digitally replacing the original royal blue velvet draped screen with a deep red curtain panel.
+            </p>
+            <div class="credit-box">
+                <strong>Source Credits:</strong> San Bernardino alle Ossa Chapel, Milan, Italy.
+            </div>
+        </div>
+
+        <!-- Tab 5: Noah's Ark Fresco -->
+        <div class="tab-content" id="tab-ark">
+            <h3>The Procession to Noah's Ark</h3>
+            <p>
+                Located in the Church of <strong>San Maurizio al Monastero Maggiore</strong> in Milan, this 16th-century Renaissance fresco by Aurelio Luini illustrates animals embarking on Noah's Ark.
+            </p>
+            <p>
+                <strong>AI Inpainting Modification:</strong> The original masterpiece shows a pair of mythical winged Pegasus horses ascending the wooden ramp. Gemini AI modified the figure prompt, transforming the winged Pegasus pair into single-horned unicorns.
+            </p>
+            <div class="credit-box">
+                <strong>Source Credits:</strong> Church of San Maurizio al Monastero Maggiore, Milan, Italy.
+            </div>
+        </div>
+
+        <!-- Tab 6: Gemini AI Inpainting Analysis -->
+        <div class="tab-content" id="tab-ai">
+            <h3>How Gemini AI Restored & Modified the Artifacts</h3>
+            <p>
+                Generative AI models like Gemini can perform image-to-image translation, digital inpainting, and restoration. Comparing human original artifacts against AI generations highlights key differences:
+            </p>
+            <ul style="margin-left: 20px; margin-bottom: 12px;">
+                <li><strong>Roman Altar Modification:</strong> In the AI-generated version, Gemini regenerated the seated goddess with smoother pink drapery and re-imagined Mercury on the side panel.</li>
+                <li><strong>Villa di Termini Modification:</strong> Gemini inserted a sharp, standing Venus with a draped red mantle into the central frame, filling in authentic lacunae.</li>
+                <li><strong>Pompeian Fresco Modification:</strong> Gemini replaced the standing nude Hermes holding a caduceus with a fully draped philosopher holding a scroll.</li>
+                <li><strong>San Bernardino Chapel Modification:</strong> Gemini inpainted the lower-left blue velvet altar screen into a rich red draped curtain.</li>
+                <li><strong>Noah's Ark Fresco Modification:</strong> Gemini transformed the twin winged Pegasus horses climbing the ark ramp into horned unicorns.</li>
+            </ul>
+        </div>
+
+        <!-- Tab 7: Original Wireframe Sketch -->
+        <div class="tab-content" id="tab-sketch">
+            <h3>Original UI Concept Sketch</h3>
+            <p>
+                This web app is built directly from the retro ASCII/terminal wireframe design sketch submitted for the <strong>[AURA] Daily Gauntlet</strong> game concept.
+            </p>
+            <div class="sketch-preview-box">
+                <img src="schetch.png" alt="Original Wireframe Sketch" onerror="this.onerror=null; this.src='image_4c065a.png'">
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">[AURA] Daily Gauntlet UI Sketch Reference</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* Dataset Definition */
+        const dataset = [
+            {
+                id: 'altar',
+                title: 'Painted Roman Altar (Ara)',
+                subtitle: 'Museo Nazionale Romano Collection',
+                humanImg: 'original.photo.jpg',
+                aiImg: 'gemini.photo.jpg',
+                humanFallback: 'descriptio AI1.jfif',
+                aiFallback: 'descriptio AI1.jfif',
+                humanDesc: 'Original photograph from the museum. Shows authentic mineral weathering, muted earth tones, and real stone texture on Ceres/Abundantia sitting with grain ears.',
+                aiDesc: 'Gemini AI generated edit. Notice higher color saturation, smoothed drapery folds, and the re-imagined Mercury holding a caduceus on the side panel.',
+                diffNotes: 'Key Difference: In the AI edit, the right side panel displays a brightly drawn Mercury with caduceus and smooth digital gradient shading, whereas the original shows authentic ancient mineral pigment fading and ambient museum lighting.'
+            },
+            {
+                id: 'termini',
+                title: 'Villa di Termini Roman Fresco',
+                subtitle: 'Late Republican Wall Painting (c. 30–20 BCE)',
+                humanImg: 'our-artwork.jpg.webp',
+                aiImg: 'geminiphoto.jpg.png',
+                humanFallback: 'image_4c02be.png',
+                aiFallback: 'image_4c05c5.png',
+                humanDesc: 'Original ancient wall fragment showing authentic plaster losses (lacunae), subtle faded red architectural borders, and aged plaster texture.',
+                aiDesc: 'Gemini AI inpainted edit. Features a standing Venus figure in high detail with a red mantle draped around her waist inside the middle panel.',
+                diffNotes: 'Key Difference: Gemini AI added a vivid standing Venus figure with a red cloak draped over her in the center alcove, hallucinating clear contours onto what is originally a subtle, faded ancient silhouette with plaster erosion.'
+            },
+            {
+                id: 'pompeii-fresco',
+                title: 'Pompeian Mythological Fresco',
+                subtitle: 'Roman Wall Painting (Hermes & Hera)',
+                humanImg: 'immagineoriginale100.png',
+                aiImg: 'immaginegemini100.png',
+                humanFallback: 'immaginegemini100.png',
+                aiFallback: 'immaginegemini100.png',
+                humanDesc: 'Original Roman fresco featuring the classical nude figure of Hermes (Mercury) holding a golden caduceus alongside seated Hera and a kneeling figure.',
+                aiDesc: 'Gemini AI edit where the standing nude Hermes holding a caduceus has been replaced with a draped Roman scholar/orator holding a parchment scroll.',
+                diffNotes: 'Key Difference: In the AI edit, the central standing nude Hermes holding a caduceus was replaced by a fully clothed, bearded orator holding a scroll.'
+            },
+            {
+                id: 'ossuary-chapel',
+                title: 'San Bernardino alle Ossa Chapel',
+                subtitle: 'Baroque Ossuary Interior & Ceiling Fresco',
+                humanImg: 'immagineoriginale200.png',
+                aiImg: 'immaginegemini200.png',
+                humanFallback: 'immagineoriginale200.png',
+                aiFallback: 'immaginegemini200.png',
+                humanDesc: 'Original chapel interior photograph displaying authentic skull and bone wall decorations, vaulted ceiling fresco, and a blue velvet draped altar screen in the lower left.',
+                aiDesc: 'Gemini AI modified interior photograph where the blue velvet draped frame on the lower left has been inpainted with a red draped curtain.',
+                diffNotes: 'Key Difference: The AI edit modified the blue velvet drapery inside the lower-left decorative niche frame, turning it into a red curtain with gold accents.'
+            },
+            {
+                id: 'noahs-ark',
+                title: 'Noah\'s Ark Renaissance Fresco',
+                subtitle: 'San Maurizio al Monastero Maggiore Fresco',
+                humanImg: 'immagineoriginale300.png',
+                aiImg: 'immaginegemini300.png',
+                humanFallback: 'immagineoriginale300.png',
+                aiFallback: 'immaginegemini300.png',
+                humanDesc: 'Original Renaissance fresco depicting animals boarding Noah\'s Ark, featuring a pair of mythical winged Pegasus horses ascending the wooden ramp.',
+                aiDesc: 'Gemini AI edited fresco where the winged Pegasus horses climbing the wooden ark ramp have been replaced with single-horned unicorns.',
+                diffNotes: 'Key Difference: In the AI modified version, the twin winged Pegasus creatures climbing the ramp into Noah\'s Ark were replaced by twin horned unicorns.'
+            }
+        ];
+
+        /* Game State */
+        let currentRoundIndex = 0;
+        let streak = 0; // STREAK INITIALIZED TO 0
+        let gameMode = 'gauntlet';
+        let currentLayout = { humanLetter: 'A', aiLetter: 'B' };
+        let isLoupeEnabled = true;
+
+        /* Image Error Handler for alternative local file names */
+        function handleImageError(imgElem) {
+            const currentItem = dataset[currentRoundIndex];
+            if (imgElem.id === 'img-a') {
+                if (currentLayout.humanLetter === 'A') {
+                    if (imgElem.src.indexOf(currentItem.humanFallback) === -1) {
+                        imgElem.src = currentItem.humanFallback;
+                    }
+                } else {
+                    if (imgElem.src.indexOf(currentItem.aiFallback) === -1) {
+                        imgElem.src = currentItem.aiFallback;
+                    }
+                }
+            } else if (imgElem.id === 'img-b') {
+                if (currentLayout.humanLetter === 'B') {
+                    if (imgElem.src.indexOf(currentItem.humanFallback) === -1) {
+                        imgElem.src = currentItem.humanFallback;
+                    }
+                } else {
+                    if (imgElem.src.indexOf(currentItem.aiFallback) === -1) {
+                        imgElem.src = currentItem.aiFallback;
+                    }
+                }
+            }
+        }
+
+        /* Load Round */
+        function loadRound(index) {
+            const item = dataset[index];
+            document.getElementById('reveal-panel').style.display = 'none';
+            document.getElementById('round-indicator').innerText = `Round ${index + 1} of ${dataset.length}: ${item.title}`;
+
+            // Randomize placement between A and B for gameplay
+            const humanIsA = Math.random() < 0.5;
+            currentLayout.humanLetter = humanIsA ? 'A' : 'B';
+            currentLayout.aiLetter = humanIsA ? 'B' : 'A';
+
+            const imgA = document.getElementById('img-a');
+            const imgB = document.getElementById('img-b');
+
+            if (humanIsA) {
+                imgA.src = item.humanImg;
+                imgB.src = item.aiImg;
+            } else {
+                imgA.src = item.aiImg;
+                imgB.src = item.humanImg;
+            }
+
+            hideLoupe('a');
+            hideLoupe('b');
+        }
+
+        /* User Selection Logic */
+        function makeSelection(choice) {
+            const currentItem = dataset[currentRoundIndex];
+            // Choosing human creation (original) is the correct answer
+            const isCorrect = (choice === currentLayout.humanLetter);
+            const panel = document.getElementById('reveal-panel');
+            const badge = document.getElementById('result-badge');
+
+            if (isCorrect) {
+                streak++; // Increment streak when correct
+                badge.className = 'result-badge correct';
+                badge.innerText = 'CORRECT DETERMINATION';
+            } else {
+                streak = 0; // Reset streak to 0 when wrong
+                badge.className = 'result-badge incorrect';
+                badge.innerText = 'INCORRECT DETERMINATION';
+            }
+
+            document.getElementById('streak-display').innerText = `Streak: ${streak}`;
+            document.getElementById('item-title-reveal').innerText = currentItem.title;
+            document.getElementById('human-card-letter').innerText = `Image ${currentLayout.humanLetter}`;
+            document.getElementById('ai-card-letter').innerText = `Image ${currentLayout.aiLetter}`;
+            document.getElementById('human-desc').innerText = currentItem.humanDesc;
+            document.getElementById('ai-desc').innerText = currentItem.aiDesc;
+            document.getElementById('detailed-diff-text').innerHTML = `<strong>Analysis:</strong> ${currentItem.diffNotes}`;
+
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        /* Next Challenge */
+        function nextRound() {
+            currentRoundIndex = (currentRoundIndex + 1) % dataset.length;
+            loadRound(currentRoundIndex);
+        }
+
+        /* Switch Game Mode */
+        function switchGameMode(mode) {
+            gameMode = mode;
+            document.getElementById('mode-gauntlet').classList.toggle('active', mode === 'gauntlet');
+            document.getElementById('mode-infinite').classList.toggle('active', mode === 'infinite');
+        }
+
+        /* Toggle Magnifier Glass */
+        function toggleLoupeMode() {
+            isLoupeEnabled = !isLoupeEnabled;
+            const btn = document.getElementById('loupe-toggle-btn');
+            const status = document.getElementById('loupe-status-text');
+            if (isLoupeEnabled) {
+                btn.classList.add('active');
+                btn.innerText = 'Toggle Zoom Loupe [ON]';
+                status.innerText = 'Hold [Space] or Hover for Zoom Loupe';
+            } else {
+                btn.classList.remove('active');
+                btn.innerText = 'Toggle Zoom Loupe [OFF]';
+                status.innerText = 'Zoom Loupe Disabled';
+                hideLoupe('a');
+                hideLoupe('b');
+            }
+        }
+
+        /* Handle Zoom Loupe Effect */
+        function handleLoupe(e, cardKey) {
+            if (!isLoupeEnabled) return;
+            const wrapper = document.getElementById(`wrapper-${cardKey}`);
+            const img = document.getElementById(`img-${cardKey}`);
+            const loupe = document.getElementById(`loupe-${cardKey}`);
+
+            if (!img.complete || img.naturalWidth === 0) return;
+
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+                hideLoupe(cardKey);
+                return;
+            }
+
+            const zoomFactor = 2.5;
+            loupe.style.display = 'block';
+            loupe.style.left = `${x - 70}px`;
+            loupe.style.top = `${y - 70}px`;
+            loupe.style.backgroundImage = `url('${img.src}')`;
+            loupe.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+
+            const bgX = (x / rect.width) * 100;
+            const bgY = (y / rect.height) * 100;
+            loupe.style.backgroundPosition = `${bgX}% ${bgY}%`;
+        }
+
+        function hideLoupe(cardKey) {
+            const loupe = document.getElementById(`loupe-${cardKey}`);
+            if (loupe) loupe.style.display = 'none';
+        }
+
+        function handleTouchLoupe(e, cardKey) {
+            if (e.touches && e.touches[0]) {
+                handleLoupe(e.touches[0], cardKey);
+            }
+        }
+
+        /* Switch Educational Tabs */
+        function switchTab(tabId, btnElem) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(el => el.classList.remove('active'));
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            if (btnElem) btnElem.classList.add('active');
+        }
+
+        /* Initialize Game on Load */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRound(currentRoundIndex);
+        });
+    </script>
+</body>
+</html>
